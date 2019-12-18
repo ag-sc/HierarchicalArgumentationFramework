@@ -1,0 +1,13 @@
+edu/ubi/sc/haf/core/HAF_Node.class
+edu/ubi/sc/haf/BackendInput.class
+edu/ubi/sc/haf/core/DimensionNode.class
+edu/ubi/sc/haf/MedicalBasicArgument.class
+edu/ubi/sc/haf/BackendOutput.class
+edu/ubi/sc/haf/core/HAF.class
+edu/ubi/sc/haf/core/BasicArgumentFactory.class
+edu/ubi/sc/haf/ServiceRequests.class
+edu/ubi/sc/haf/App.class
+edu/ubi/sc/haf/core/BasicArgument.class
+edu/ubi/sc/haf/core/RangeFilter.class
+edu/ubi/sc/haf/ClinicalTrial.class
+edu/ubi/sc/haf/core/Filter.class
