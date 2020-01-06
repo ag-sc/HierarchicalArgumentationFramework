@@ -31,7 +31,7 @@ public class DiabetesHAF {
 		top.addChild(safety);
 		top.addChild(efficiency);
 		
-		GlaucomaBasicArgumentFactory factory = new GlaucomaBasicArgumentFactory();
+		DiabetesBasicArgumentFactory factory = new DiabetesBasicArgumentFactory();
 		
 		/*
 		List<ClinicalTrial> trials = null;
@@ -42,7 +42,7 @@ public class DiabetesHAF {
 		*/
 		
 		HashMap<String,Double> weights = backendInput.weights;
-		HashMap<String,Filter> filters = new HashMap<String,Filter>();
+		HashMap<String,RangeFilter> filters = backendInput.filters;
 		List<ClinicalTrial> trials = backendInput.evidence;
 		
 		HAF<MedicalBasicArgument> top_HAF = new HAF<MedicalBasicArgument>(top, weights, filters, 
@@ -62,5 +62,40 @@ public class DiabetesHAF {
 		backendOutput.evidence = top_HAF.getTrials();
 		return backendOutput;
 	}
-
+	
+	public static void main(String[] args) {
+		org.apache.jena.query.ARQ.init();
+		JenaSystem.init();
+		
+		DimensionNode top = new DimensionNode("top");
+		DimensionNode safety = new DimensionNode("safety");
+		DimensionNode efficiency = new DimensionNode("efficacy");
+		DimensionNode hba1c_reduction = new DimensionNode(DiabetesBasicArgumentFactory.diabetesEndpointDesc);
+		DimensionNode sideeffect = new DimensionNode(DiabetesBasicArgumentFactory.diabetesAdvEffName);
+		
+		safety.addChild(sideeffect);
+		efficiency.addChild(hba1c_reduction);
+		top.addChild(safety);
+		top.addChild(efficiency);
+		
+		DiabetesBasicArgumentFactory factory = new DiabetesBasicArgumentFactory();
+		List<ClinicalTrial> trials = null;
+		HashMap<String,Double> weights = new HashMap<String,Double>();
+		weights.put("safety", 0.5);
+		weights.put("efficacy", 0.5);
+		
+		HashMap<String,RangeFilter> filters = new HashMap<String,RangeFilter>();
+		RangeFilter filter = new RangeFilter(0,0);
+		//filters.put("numPatients", filter);
+		
+		HAF<MedicalBasicArgument> top_HAF = new HAF<MedicalBasicArgument>(top, weights, filters, 
+				factory, trials);
+		
+		
+		factory.createBasicArguments();
+		top_HAF.voidSetFactory(factory);
+		
+		Map<String, Object> textualArgument = top_HAF.getTextualArgument("Glargine_Insulin", "NPH_Insulin");
+		System.out.println(textualArgument);
+	}
 }

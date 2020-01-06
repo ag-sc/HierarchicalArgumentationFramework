@@ -1,9 +1,14 @@
 package edu.ubi.sc.haf.core;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import edu.ubi.sc.haf.ClinicalTrial;
+import edu.ubi.sc.haf.DiabetesBasicArgumentFactory;
+import edu.ubi.sc.haf.GlaucomaBasicArgumentFactory;
 
 
 public class HAF<T> implements HAF_Node{
@@ -12,9 +17,7 @@ public class HAF<T> implements HAF_Node{
 	
 	Map<String,Double> Weights;
 	
-	HashMap<String,Filter> Filters;
-	
-	List<HAF_Node> subnodes;
+	HashMap<String,RangeFilter> RangeFilters;
 	
 	List<ClinicalTrial> trials;
 	
@@ -23,7 +26,7 @@ public class HAF<T> implements HAF_Node{
 	public HAF(DimensionNode node)
 	{
 		Weights = new HashMap<String,Double>();
-		Filters = new HashMap<String,Filter>();	
+		RangeFilters = new HashMap<String,RangeFilter>();	
 		Node = node;
 		
 		List<String> dimensions = node.getAllDimensions();
@@ -36,11 +39,11 @@ public class HAF<T> implements HAF_Node{
 		
 	}
 	
-	public HAF(DimensionNode node, Map<String,Double> weights, HashMap<String,Filter> filters, 
+	public HAF(DimensionNode node, Map<String,Double> weights, HashMap<String,RangeFilter> RangeFilters, 
 			BasicArgumentFactory factory, List<ClinicalTrial> trials)
 	{
 		Weights = weights;
-		Filters = filters;
+		this.RangeFilters = RangeFilters;
 		Factory = factory;
 		Node = node;
 		
@@ -69,13 +72,28 @@ public class HAF<T> implements HAF_Node{
 		
 		HAF<T> haf;
 		
-		subnodes = new ArrayList<HAF_Node>();
+		List<HAF_Node> subnodes = new ArrayList<HAF_Node>();
 		
 		// generate textual argument for current node ////////////////////////////////
 		double score = this.evaluate(superior, inferior);
 		double weight;
-		String textualArgument;
+		String superiorityString;
+		String textualArgument = null;
 		String superiorString;
+		
+		Locale locale  = new Locale("en", "UK");
+		String pattern = "###.##";
+		DecimalFormat df = (DecimalFormat)
+		        NumberFormat.getNumberInstance(locale);
+		df.applyPattern(pattern);
+		
+		// check is basic arguments exist
+		if(Factory.getBasicArguments(GlaucomaBasicArgumentFactory.glaucomaEndpointDesc, RangeFilters, trials).size() == 0
+				&& Factory.getBasicArguments(DiabetesBasicArgumentFactory.diabetesEndpointDesc, RangeFilters, trials).size() == 0) {;
+			verbalization.put("text", "No basic arguments left!");
+			verbalization.put("children", null);
+			return verbalization;
+		}
 		
 		// generate subarguments for all children of the current node
 		if (subdimensions.size() > 0)
@@ -83,10 +101,16 @@ public class HAF<T> implements HAF_Node{
 			
 			for (DimensionNode node: subdimensions)
 			{
-				System.out.println("Subdimension: "+node.getDimension());
+				System.out.println("Subdimension text: "+node.getDimension());
 		
-				haf = new HAF<T>(node,Weights,Filters,Factory,trials);		
+				haf = new HAF<T>(node,Weights,RangeFilters,Factory,trials);		
 				subnodes.add(haf);
+			}
+			System.out.println(subnodes);
+			
+			for (HAF_Node subnode: subnodes)
+			{
+				System.out.println("subnode text: "+subnode.getDimension());
 			}
 			
 			for (HAF_Node subnode: subnodes)
@@ -95,60 +119,55 @@ public class HAF<T> implements HAF_Node{
 			}
 			
 			verbalization.put("children", subarguments);		
+		} else {
+			verbalization.put("children", null);
 		}
-		else
-		{
-			List<BasicArgument> bas = Factory.getBasicArguments(Top, Filters, trials);
-			
-			System.out.println("Getting basic arguments for superiority of "+superior+ " vs. "+inferior+" with respect to "+Top);
-			
-			/*
-			for (BasicArgument ba:bas)
-			{
-				subnodes.add(ba);
+		
+		// generate verbalization for current node ////////////////////
+		if (subdimensions.size() > 0)
+		{	
+			if(score > 0.5) {
+				superiorityString = "shown to be superior";
+			} else {
+				superiorityString = "not shown to be superior";
 			}
 			
-			double count = 0;
-			
-			for (HAF_Node node: subnodes)
-			{
-				if (node.evaluate(superior, inferior) == 1.0)
-				{
-					count=count+1.0;
-				}
+			if(this.getDimension().equalsIgnoreCase("top")) {
+				textualArgument = "Overall, the " + superior + " treatment has " + superiorityString
+						+ " to the " + inferior + " treatment with respect to " + subdimensions.get(0).getDimension()
+						+ " (weight " + Weights.get(subdimensions.get(0).getDimension()) + ") and "
+						+ subdimensions.get(1).getDimension() + " (weight " + Weights.get(subdimensions.get(1).getDimension())
+						+ "). The overall score is " + df.format(score) + ".";
+			} else {
+				textualArgument = "The " + superior + " treatment has " + superiorityString
+					+ " to the " + inferior + " treatment with respect to " + Top
+					+ " with a score of " + df.format(score) + ".";
 			}
-			*/
-			
+		} else { // textual argument for leaf node
+			List<BasicArgument> bas = Factory.getBasicArguments(Top, RangeFilters, trials);
+			double numBasicArguments = bas.size();
 			double count = 0;
 			
 			for (BasicArgument ba:bas)
 			{
-				subnodes.add(ba);
 				if (ba.evaluate(superior, inferior) == 1.0)
 				{
 					count=count+1.0;
 				}
 			}
-		}
-		
-		// generate verbalization for current node
-		String superiorityString;
-		if(score > 0.5) {
-			superiorityString = "shown to be superior";
-		} else {
-			superiorityString = "not shown to be superior";
-		}
-		
-		if(this.getDimension().equalsIgnoreCase("top")) {
-			textualArgument = "Overall, the " + superior + " treatment has " + superiorityString
-					+ " to the " + inferior + " treatment with respect to " + subdimensions.get(0).getDimension()
-					+ " (weight " + Weights.get(subdimensions.get(0).getDimension()) + ") and "
-					+ subdimensions.get(1).getDimension() + " (weight " + Weights.get(subdimensions.get(1).getDimension())
-					+ ". The overall score is " + score + ".";
-		} else {
+			
+			// check superiority
+			score = count / numBasicArguments;
+			
+			if(score > 0.5) {
+				superiorityString = "shown to be superior";
+			} else {
+				superiorityString = "not shown to be superior";
+			}
+			
 			textualArgument = "The " + superior + " treatment has " + superiorityString
-				+ " to the " + inferior + " treatment with respect to " + Top
-				+ " with a score of " + score + ".";
+					+ " to the " + inferior + " treatment with respect to " + Top
+					+ " with a score of " + df.format(score) + ".";
 		}
 		
 		verbalization.put("text", textualArgument);
@@ -166,7 +185,7 @@ public class HAF<T> implements HAF_Node{
 		
 		HAF<T> haf;
 		
-		subnodes = new ArrayList<HAF_Node>();
+		List<HAF_Node> subnodes = new ArrayList<HAF_Node>();
 		
 		if (subdimensions.size() > 0)
 		{
@@ -175,7 +194,7 @@ public class HAF<T> implements HAF_Node{
 			{
 				System.out.println("Subdimension: "+node.getDimension());
 		
-				haf = new HAF<T>(node,Weights,Filters,Factory, trials);		
+				haf = new HAF<T>(node,Weights,RangeFilters,Factory, trials);		
 				subnodes.add(haf);
 			}
 		
@@ -207,7 +226,7 @@ public class HAF<T> implements HAF_Node{
 		}
 		else
 		{
-			List<BasicArgument> bas = Factory.getBasicArguments(Top, Filters, trials);
+			List<BasicArgument> bas = Factory.getBasicArguments(Top, RangeFilters, trials);
 			
 			System.out.println("Getting basic arguments for superiority of "+superior+ " vs. "+inferior+" with respect to "+Top);
 			
@@ -253,17 +272,17 @@ public class HAF<T> implements HAF_Node{
 
 
 
-	public void setFilter(String property, String value)
+	public void setRangeFilter(String property, String value)
 	{
 		
 	}
 	
-	public void removeFilter(String property)
+	public void removeRangeFilter(String property)
 	{
 		
 	}
 	
-	public void removeAllFilters()
+	public void removeAllRangeFilters()
 	{
 		
 	}
@@ -339,7 +358,7 @@ public class HAF<T> implements HAF_Node{
 				copy = getCopy(map);
 				copy.put(dimension,copy.get(dimension)+step);
 			
-				haf = new HAF<T>(node,copy,Filters,Factory, trials);
+				haf = new HAF<T>(node,copy,RangeFilters,Factory, trials);
 			
 				if (haf.evaluate(superior, inferior) > 0.5)
 				{

@@ -3715,89 +3715,99 @@ ctro:Pub_2 rdf:type owl:NamedIndividual ,
 ctro:Pub_21 rdf:type owl:NamedIndividual ,
                      ctro:Publication ;
             ctro:describes ctro:CT_21 ;
-            ctro:hasAuthor "Hsia"^^xsd:string ;
+            ctro:hasAuthor "Hsia, SH"^^xsd:string ;
             ctro:hasPMID 21146881 ;
             ctro:hasPublicationYear 2011 ;
-            ctro:hasTitle "Insulin glargine compared to NPH among insulin-naı¨ve, U.S. inner city, ethnic minority type 2 diabetic patient"^^xsd:string ;
-            rdfs:label "Hsia"^^xsd:string .
+            ctro:hasTitle "Insulin glargine compared to NPH among insulin-naıve, U.S. inner city, ethnic minority type 2 diabetic patient."^^xsd:string ;
+            rdfs:label "Hsia, SH"^^xsd:string .
 
 
 ###  http://www.semanticweb.org/root/ontologies/2018/6/ctro#Pub_22
 ctro:Pub_22 rdf:type owl:NamedIndividual ,
                      ctro:Publication ;
             ctro:describes ctro:CT_22 ;
-            ctro:hasAuthor "Forst"^^xsd:string ;
+            ctro:hasAuthor "Forst T et al."^^xsd:string ;
             ctro:hasPMID 20415692 ;
             ctro:hasPublicationYear 2010 ;
-            ctro:hasTitle "Adding insulin glargine vs. NPH insulin to metformin results in a more efficient postprandial beta-cell protection in individuals with type 2 diabetes"^^xsd:string ;
-            rdfs:label "Forst"^^xsd:string .
+            ctro:hasTitle "Adding insulin glargine vs. NPH insulin to metformin results in a more efficient postprandial beta-cell protection in individuals with type 2 diabetes."^^xsd:string ;
+            rdfs:label "Forst T et al."^^xsd:string .
 
 
 ###  http://www.semanticweb.org/root/ontologies/2018/6/ctro#Pub_23
 ctro:Pub_23 rdf:type owl:NamedIndividual ,
                      ctro:Publication ;
             ctro:describes ctro:CT_23 ;
-            ctro:hasAuthor "Esposito "^^xsd:string ;
+            ctro:hasAuthor "Esposito K et al."^^xsd:string ;
             ctro:hasPMID 18936501 ;
             ctro:hasPublicationYear 2008 ;
             ctro:hasTitle "Addition of neutral protamine lispro insulin or insulin glargine to oral type 2 diabetes regimens for patients with suboptimal glycemic control: a randomized trial. "^^xsd:string ;
-            rdfs:label "Esposito "^^xsd:string .
+            rdfs:label "Esposito K et al."^^xsd:string .
 
 
 ###  http://www.semanticweb.org/root/ontologies/2018/6/ctro#Pub_24
 ctro:Pub_24 rdf:type owl:NamedIndividual ,
                      ctro:Publication ;
             ctro:describes ctro:CT_24 ;
-            ctro:hasAuthor "Eliaschewitz "^^xsd:string ;
+            ctro:hasAuthor "Eliaschewitz FG et al."^^xsd:string ;
             ctro:hasPMID 16715577 ;
             ctro:hasPublicationYear 2006 ;
             ctro:hasTitle "Therapy in type 2 diabetes: insulin glargine vs. NPH insulin both in combination with glimepiride."^^xsd:string ;
-            rdfs:label "Eliaschewitz "^^xsd:string .
+            rdfs:label "Eliaschewitz FG et al."^^xsd:string .
 
 
 ###  http://www.semanticweb.org/root/ontologies/2018/6/ctro#Pub_25
 ctro:Pub_25 rdf:type owl:NamedIndividual ,
                      ctro:Publication ;
             ctro:describes ctro:CT_25 ;
-            ctro:hasAuthor "Fritsche"^^xsd:string ;
+            ctro:hasAuthor "Fritsche A, Schweitzer MA, Haring H-U"^^xsd:string ;
             ctro:hasPMID 12809451 ;
-            rdfs:label "Fritsche"^^xsd:string .
+            ctro:hasPublicationYear 2003 ;
+            ctro:hasTitle "Glimepiride combined with morning insulin glargine, bedtime neutral protamine hagedorn insulin, or bedtime insulin glargine in patients with type 2 diabetes. A randomized, controlled trial."^^xsd:string ;
+            rdfs:label "Fritsche A, Schweitzer MA, Haring H-U"^^xsd:string .
 
 
 ###  http://www.semanticweb.org/root/ontologies/2018/6/ctro#Pub_26
 ctro:Pub_26 rdf:type owl:NamedIndividual ,
                      ctro:Publication ;
             ctro:describes ctro:CT_26 ;
-            ctro:hasAuthor "Yki-Jarvinen "^^xsd:string ;
+            ctro:hasAuthor "Yki-Jarvinen H et al."^^xsd:string ;
             ctro:hasPMID 16456680 ;
-            rdfs:label "Yki-Jarvinen "^^xsd:string .
+            ctro:hasPublicationYear 2006 ;
+            ctro:hasTitle "Insulin glargine or NPH combined with metformin in type 2 diabetes: the LANMET study."^^xsd:string ;
+            rdfs:label "Yki-Jarvinen H et al."^^xsd:string .
 
 
 ###  http://www.semanticweb.org/root/ontologies/2018/6/ctro#Pub_27
 ctro:Pub_27 rdf:type owl:NamedIndividual ,
                      ctro:Publication ;
             ctro:describes ctro:CT_27 ;
-            ctro:hasAuthor "Riddle "^^xsd:string ;
+            ctro:hasAuthor "Riddle MC, Rosenstock J, Gerich J"^^xsd:string ;
             ctro:hasPMID 14578243 ;
-            rdfs:label "Riddle "^^xsd:string .
+            ctro:hasPublicationYear 2003 ;
+            ctro:hasTitle "The treat-to-target trial: randomized addition of glargine or human NPH insulin to oral therapy of type 2 diabetic patients."^^xsd:string ;
+            rdfs:label "Riddle MC, Rosenstock J, Gerich J"^^xsd:string .
 
 
 ###  http://www.semanticweb.org/root/ontologies/2018/6/ctro#Pub_28
 ctro:Pub_28 rdf:type owl:NamedIndividual ,
                      ctro:Publication ;
             ctro:describes ctro:CT_28 ;
-            ctro:hasAuthor "Massi-Bendetti "^^xsd:string ;
+            ctro:hasAuthor "Massi Benedetti M, Humburg E, Dressler A, Ziemen M"^^xsd:string ;
             ctro:hasPMID 12734781 ;
-            rdfs:label "Massi-Bendetti "^^xsd:string .
+            ctro:hasPublicationYear 2003 ;
+            ctro:hasTitle "A one-year, randomised, multicentre trial comparing insulin glargine with NPH insulin in combination with oral agents in patients with type 2 diabetes. "^^xsd:string ;
+            rdfs:label "Massi Benedetti M, Humburg E, Dressler A, Ziemen M"^^xsd:string .
 
 
 ###  http://www.semanticweb.org/root/ontologies/2018/6/ctro#Pub_29
 ctro:Pub_29 rdf:type owl:NamedIndividual ,
                      ctro:Publication ;
             ctro:describes ctro:CT_29 ;
-            ctro:hasAuthor "Strojek "^^xsd:string ;
+            ctro:hasAuthor "Strojek k K, Shi C, Carey MA, Jacober SJ"^^xsd:string ;
             ctro:hasPMID 20920045 ;
-            rdfs:label "Strojek "^^xsd:string .
+            ctro:hasPublicationYear 2010 ;
+            ctro:hasTitle "Addition of insulin lispro protamine suspension or insulin glargine to oral type 2 diabetes regimens: a randomized trial."^^xsd:string ;
+            rdfs:label "Strojek k K, Shi C, Carey MA, Jacober SJ"^^xsd:string .
 
 
 ###  http://www.semanticweb.org/root/ontologies/2018/6/ctro#Pub_3

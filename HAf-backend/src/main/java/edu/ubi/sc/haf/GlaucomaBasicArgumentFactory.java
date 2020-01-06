@@ -76,7 +76,7 @@ public class GlaucomaBasicArgumentFactory implements BasicArgumentFactory {
 		  
 		String queryDyn="";	
 			
-		pss.setCommandText("SELECT DISTINCT ?ct ?pmid ?country_l ?duration ?numPatients ?avgAge ?drugName1 ?drugName2 ?endpointDesc ?reduction1 ?reduction2 ?AEName ?numAffected1 ?numAffected2\n" + 
+		pss.setCommandText("SELECT DISTINCT ?ct ?pmid ?title ?author ?country_l ?duration ?numPatients ?avgAge ?drugName1 ?drugName2 ?endpointDesc ?reduction1 ?reduction2 ?AEName ?numAffected1 ?numAffected2\n" + 
 				"WHERE{\n" + 
 				"?medic1 :hasDrug :" + drug1 +" . \n" + 
 				"?medic2 :hasDrug :" + drug2 +" . \n" + 
@@ -90,6 +90,10 @@ public class GlaucomaBasicArgumentFactory implements BasicArgumentFactory {
 				"  ?ct :hasArm ?arm2 .\n" + 
 				"  ?pub :describes ?ct. \n" + 
 				"  ?pub :hasPMID ?pmid.  \n" + 
+				
+				" ?pub :hasTitle ?title. \n" +
+				"  ?pub rdfs:label ?author. \n" +
+				
 				"  ?ct :hasPopulation ?population .\n" + 
 				"  ?population :hasCountry ?country .\n" + 
 				"  ?country rdfs:label ?country_l. \n" +
@@ -166,9 +170,18 @@ public class GlaucomaBasicArgumentFactory implements BasicArgumentFactory {
 			String id = row.get("ct").toString();
 			trial.id = id.substring(id.lastIndexOf("#")+1);
 			
-			trial.title = "title";
-			trial.authors = "authors";
-			trial.link = "link";
+			String pmidStr = row.get("pmid").toString();
+			pmidStr = pmidStr.substring(0, pmidStr.indexOf("^^"));
+			int pmidInt = Integer.valueOf(pmidStr);
+			trial.link = "https://www.ncbi.nlm.nih.gov/pubmed/" + pmidInt;
+			System.out.println(",,,link: " + trial.link);
+			
+			String title = row.get("title").toString();
+			
+			String authors = row.get("author").toString();
+			
+			trial.title = title;
+			trial.authors = authors;
 			trial.include = true;
 			
 			trials.add(trial);
@@ -195,14 +208,32 @@ public class GlaucomaBasicArgumentFactory implements BasicArgumentFactory {
 		while(resultSet.hasNext()) {
 			QuerySolution row = resultSet.next();
 			
+			// basic information about trial
+			String trialId = row.get("ct").toString();
+			trialId = trialId.substring(trialId.lastIndexOf('#')+1);
+			
+			String durationStr = row.get("duration").toString();
+			durationStr = durationStr.substring(0, durationStr.indexOf(' '));
+			double duration = Double.parseDouble(durationStr);
+			
+			String avgAgeStr = row.get("avgAge").toString();
+			avgAgeStr = avgAgeStr.substring(0, avgAgeStr.indexOf("^^"));
+			double avgAge = Double.parseDouble(avgAgeStr);
+			
+			String numPatientsStr = row.get("numPatients").toString();
+			numPatientsStr = numPatientsStr.substring(0, numPatientsStr.indexOf("^^"));
+			double numPatients = Double.parseDouble(numPatientsStr);
+			
 			// efficacy //////////////////////////////////////////////////
 			String dimension = GlaucomaBasicArgumentFactory.glaucomaEndpointDesc; //row.get("endpointDesc").toString();
 			String disease = "Glaucoma";
 			String comparator = ">";
-			String trialId = row.get("ct").toString();
 			
 			MedicalBasicArgument basicArgumentEfficacy = new MedicalBasicArgument(disease, dimension, comparator);
 			basicArgumentEfficacy.setTrialId(trialId);
+			basicArgumentEfficacy.setAvgAge(avgAge);
+			basicArgumentEfficacy.setNumPatients(numPatients);
+			basicArgumentEfficacy.setStudyDuration(duration);
 			
 			String drugName1 = row.get("drugName1").toString();
 			drugName1 = drugName1.substring(drugName1.lastIndexOf('#')+1);
@@ -216,6 +247,11 @@ public class GlaucomaBasicArgumentFactory implements BasicArgumentFactory {
 			
 			this.basicArguments.add(basicArgumentEfficacy);
 			
+			// debugging ///////////
+			System.out.println("duration: " + duration);
+			System.out.println("avgAge: " + avgAge);
+			System.out.println("numPatients: " + numPatients);
+			
 			
 			// safety //////////////////////////////////////////////////
 			dimension = GlaucomaBasicArgumentFactory.glaucomaAdvEffName; //row.get("AEName").toString();
@@ -224,6 +260,9 @@ public class GlaucomaBasicArgumentFactory implements BasicArgumentFactory {
 			
 			MedicalBasicArgument basicArgumentSafety = new MedicalBasicArgument(disease, dimension, comparator);
 			basicArgumentSafety.setTrialId(trialId);
+			basicArgumentSafety.setAvgAge(avgAge);
+			basicArgumentSafety.setNumPatients(numPatients);
+			basicArgumentSafety.setStudyDuration(duration);
 			
 			double numAffectedAdverseEvent1 = Double.valueOf(row.get("numAffected1").toString());
 			basicArgumentSafety.addEvidence(drugName1, numAffectedAdverseEvent1);
@@ -247,7 +286,7 @@ public class GlaucomaBasicArgumentFactory implements BasicArgumentFactory {
 	}
 
 	@Override
-	public List<BasicArgument> getBasicArguments(String dimension, HashMap<String,Filter> filters, List<ClinicalTrial> trials)
+	public List<BasicArgument> getBasicArguments(String dimension, HashMap<String,RangeFilter> filters, List<ClinicalTrial> trials)
 	{
 		List<BasicArgument> arguments = new ArrayList<BasicArgument>();
 		
@@ -308,8 +347,13 @@ public class GlaucomaBasicArgumentFactory implements BasicArgumentFactory {
 		
 		GlaucomaBasicArgumentFactory factory = new GlaucomaBasicArgumentFactory();
 		List<ClinicalTrial> trials = factory.getTrials();
-		for(ClinicalTrial trial : trials)
+		factory.createBasicArguments();
+		for(ClinicalTrial trial : trials) {
 			System.out.println(trial.id);
+			System.out.println(trial.title);
+			System.out.println(trial.authors);
+			System.out.println("----------");
+		}
 	}
 }
 

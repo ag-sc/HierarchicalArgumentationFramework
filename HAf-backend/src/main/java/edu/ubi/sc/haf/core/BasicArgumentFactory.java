@@ -12,5 +12,5 @@ public interface BasicArgumentFactory {
 	
 	public List<ClinicalTrial> getTrials();
 	
-	public List<BasicArgument> getBasicArguments(String dimension, HashMap<String,Filter> filters, List<ClinicalTrial> trials);
+	public List<BasicArgument> getBasicArguments(String dimension, HashMap<String,RangeFilter> filters, List<ClinicalTrial> trials);
 }

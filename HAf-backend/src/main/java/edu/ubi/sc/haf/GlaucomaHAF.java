@@ -8,7 +8,7 @@ import org.apache.jena.sys.JenaSystem;
 
 import edu.ubi.sc.haf.core.BasicArgumentFactory;
 import edu.ubi.sc.haf.core.DimensionNode;
-import edu.ubi.sc.haf.core.Filter;
+import edu.ubi.sc.haf.core.RangeFilter;
 import edu.ubi.sc.haf.core.HAF;
 import edu.ubi.sc.haf.core.RangeFilter;
 
@@ -37,11 +37,11 @@ public class GlaucomaHAF {
 		HashMap<String,Double> weights = new HashMap<String,Double>();
 		weights.put("Safety", 0.5);
 		weights.put("Efficacy", 0.5);
-		HashMap<String,Filter> filters = new HashMap<String,Filter>();
+		HashMap<String,RangeFilter> RangeFilters = new HashMap<String,RangeFilter>();
 		*/
 		
 		HashMap<String,Double> weights = backendInput.weights;
-		HashMap<String,Filter> filters = new HashMap<String,Filter>();
+		HashMap<String,RangeFilter> filters = backendInput.filters;
 		List<ClinicalTrial> trials = backendInput.evidence;
 		
 		HAF<MedicalBasicArgument> top_HAF = new HAF<MedicalBasicArgument>(top, weights, filters, 
@@ -62,4 +62,43 @@ public class GlaucomaHAF {
 		return backendOutput;
 	}
 
+	
+	public static void main(String[] args) {
+		org.apache.jena.query.ARQ.init();
+		JenaSystem.init();
+		
+		DimensionNode top = new DimensionNode("top");
+		DimensionNode safety = new DimensionNode("safety");
+		DimensionNode efficiency = new DimensionNode("efficacy");
+		DimensionNode iop_reduction = new DimensionNode(GlaucomaBasicArgumentFactory.glaucomaEndpointDesc);
+		DimensionNode sideeffect = new DimensionNode(GlaucomaBasicArgumentFactory.glaucomaAdvEffName);
+		
+		safety.addChild(sideeffect);
+		efficiency.addChild(iop_reduction);
+		top.addChild(safety);
+		top.addChild(efficiency);
+		
+		GlaucomaBasicArgumentFactory factory = new GlaucomaBasicArgumentFactory();
+		
+		
+		List<ClinicalTrial> trials = null;
+		HashMap<String,Double> weights = new HashMap<String,Double>();
+		weights.put("safety", 0.5);
+		weights.put("efficacy", 0.5);
+		HashMap<String,RangeFilter> RangeFilters = new HashMap<String,RangeFilter>();
+		
+		
+		
+		HAF<MedicalBasicArgument> top_HAF = new HAF<MedicalBasicArgument>(top, weights, RangeFilters, 
+				factory, trials);
+		
+		
+		factory.createBasicArguments();
+
+		top_HAF.voidSetFactory(factory);
+
+		//double score = top_HAF.evaluate("Latanoprost", "Timolol");
+		
+		System.out.println(top_HAF.getTextualArgument("Latanoprost", "Timolol"));
+	}
 }

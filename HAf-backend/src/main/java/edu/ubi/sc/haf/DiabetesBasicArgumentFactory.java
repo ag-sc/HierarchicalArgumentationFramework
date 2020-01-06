@@ -64,7 +64,7 @@ public class DiabetesBasicArgumentFactory implements BasicArgumentFactory{
 		  
 		String queryDyn="";	
 			
-		pss.setCommandText("SELECT DISTINCT ?ct ?pmid ?country_l ?duration ?numPatients ?avgAge ?drugName1 ?drugName2 ?endpointDesc ?reduction1 ?reduction2 ?AEName ?numAffected1 ?numAffected2\n" + 
+		pss.setCommandText("SELECT DISTINCT ?ct ?pmid ?title ?author ?country_l ?duration ?numPatients ?avgAge ?drugName1 ?drugName2 ?endpointDesc ?reduction1 ?reduction2 ?AEName ?numAffected1 ?numAffected2\n" + 
 				"WHERE{\n" + 
 				"?medic1 :hasDrug :" + drug1 +" . \n" + 
 				"?medic2 :hasDrug :" + drug2 +" . \n" + 
@@ -78,6 +78,10 @@ public class DiabetesBasicArgumentFactory implements BasicArgumentFactory{
 				"  ?ct :hasArm ?arm2 .\n" + 
 				"  ?pub :describes ?ct. \n" + 
 				"  ?pub :hasPMID ?pmid.  \n" + 
+				
+				" ?pub :hasTitle ?title. \n" +
+				"  ?pub rdfs:label ?author. \n" +
+				
 				"  ?ct :hasPopulation ?population .\n" + 
 				"  ?population :hasCountry ?country .\n" + 
 				"  ?country rdfs:label ?country_l. \n" +
@@ -154,9 +158,18 @@ public class DiabetesBasicArgumentFactory implements BasicArgumentFactory{
 			String id = row.get("ct").toString();
 			trial.id = id.substring(id.lastIndexOf("#")+1);
 			
-			trial.title = "title";
-			trial.authors = "authors";
-			trial.link = "link";
+			String pmidStr = row.get("pmid").toString();
+			pmidStr = pmidStr.substring(0, pmidStr.indexOf("^^"));
+			int pmidInt = Integer.valueOf(pmidStr);
+			trial.link = "https://www.ncbi.nlm.nih.gov/pubmed/" + pmidInt;
+			System.out.println(",,,link: " + trial.link);
+			
+			String title = row.get("title").toString();
+			
+			String authors = row.get("author").toString();
+			
+			trial.title = title;
+			trial.authors = authors;
 			trial.include = true;
 			
 			trials.add(trial);
@@ -169,12 +182,12 @@ public class DiabetesBasicArgumentFactory implements BasicArgumentFactory{
 	{
 		//String query=createQuery();
 		String queryString = createQuery();
-		Model model= FileManager.get().loadModel("/home/cwitte/eclipse-workspace/HAF_backend/ctro_v4.ttl");
+		Model model= FileManager.get().loadModel("ctro_v4.ttl");
 		
 		QueryExecution qexec = QueryExecutionFactory.create(queryString, model);
 		  	 	  
 		ResultSet resultSet = qexec.execSelect();		
-		ResultSetFormatter.out(resultSet);
+		//ResultSetFormatter.out(resultSet);
 		
 		List<String> varNames = resultSet.getResultVars();
 		for(String s : varNames) {
@@ -182,16 +195,35 @@ public class DiabetesBasicArgumentFactory implements BasicArgumentFactory{
 		}
 		
 		while(resultSet.hasNext()) {
+			System.out.println("diabetes row");
 			QuerySolution row = resultSet.next();
 			
-			// efficacy //////////////////////////////////////////////////
 			String dimension = DiabetesBasicArgumentFactory.diabetesEndpointDesc;
 			String disease = "Type 2 Diabetes";
 			String comparator = ">";
-			String trialId = row.get("ct").toString();
 			
+			// study information
+			String trialId = row.get("ct").toString();
+			trialId = trialId.substring(trialId.lastIndexOf('#')+1);
+			
+			String durationStr = row.get("duration").toString();
+			durationStr = durationStr.substring(0, durationStr.indexOf(' '));
+			double duration = Double.parseDouble(durationStr);
+			
+			String avgAgeStr = row.get("avgAge").toString();
+			avgAgeStr = avgAgeStr.substring(0, avgAgeStr.indexOf("^^"));
+			double avgAge = Double.parseDouble(avgAgeStr);
+			
+			String numPatientsStr = row.get("numPatients").toString();
+			numPatientsStr = numPatientsStr.substring(0, numPatientsStr.indexOf("^^"));
+			double numPatients = Double.parseDouble(numPatientsStr);
+			
+			// efficacy //////////////////////////////////////////////////
 			MedicalBasicArgument basicArgumentEfficacy = new MedicalBasicArgument(disease, dimension, comparator);
 			basicArgumentEfficacy.setTrialId(trialId);
+			basicArgumentEfficacy.setAvgAge(avgAge);
+			basicArgumentEfficacy.setNumPatients(numPatients);
+			basicArgumentEfficacy.setStudyDuration(duration);
 			
 			String drugName1 = row.get("drugName1").toString();
 			drugName1 = drugName1.substring(drugName1.lastIndexOf('#')+1);
@@ -213,6 +245,9 @@ public class DiabetesBasicArgumentFactory implements BasicArgumentFactory{
 			
 			MedicalBasicArgument basicArgumentSafety = new MedicalBasicArgument(disease, dimension, comparator);
 			basicArgumentSafety.setTrialId(trialId);
+			basicArgumentSafety.setAvgAge(avgAge);
+			basicArgumentSafety.setNumPatients(numPatients);
+			basicArgumentSafety.setStudyDuration(duration);
 			
 			double numAffectedAdverseEvent1 = Double.valueOf(row.get("numAffected1").toString());
 			basicArgumentSafety.addEvidence(drugName1, numAffectedAdverseEvent1);
@@ -236,7 +271,7 @@ public class DiabetesBasicArgumentFactory implements BasicArgumentFactory{
 	}
 
 	@Override
-	public List<BasicArgument> getBasicArguments(String dimension, HashMap<String,Filter> filters, List<ClinicalTrial> trials)
+	public List<BasicArgument> getBasicArguments(String dimension, HashMap<String,RangeFilter> filters, List<ClinicalTrial> trials)
 	{
 		List<BasicArgument> arguments = new ArrayList<BasicArgument>();
 		
@@ -266,7 +301,11 @@ public class DiabetesBasicArgumentFactory implements BasicArgumentFactory{
 		    	if(filters.containsKey(BackendInput.NUM_PATIENTS_STR)) {
 		    		RangeFilter filter = (RangeFilter) filters.get(BackendInput.NUM_PATIENTS_STR);
 		    		double numPatients = argument.getNumPatients();
+		    		System.out.println("numPatients___________: " + numPatients);
+		    		System.out.println("min: " + filter.getMin());
+		    		System.out.println("max: " + filter.getMax());
 		    		if( !(numPatients >= filter.getMin() && numPatients <= filter.getMax()) ) {
+		    			System.out.println("num_patients filtered");
 		    			filterSuccess = false;
 		    		}
 		    	}
